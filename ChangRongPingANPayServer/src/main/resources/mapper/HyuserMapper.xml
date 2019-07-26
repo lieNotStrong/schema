@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="HyuserMapper">
+	<sql id="Base_Column_List" >
+			a.*
+  	</sql>
+	
+	<!-- 新增-->
+	<insert id="save" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_user(
+			userid,
+			hyb_count,
+			hyb_succ_count,
+			typezh,
+			createtime
+		) values (
+			#{userid,jdbcType=VARCHAR},
+			#{hyb_count,jdbcType=VARCHAR},	
+			#{hyb_succ_count,jdbcType=VARCHAR},	
+			#{typezh,jdbcType=VARCHAR},
+			#{createtime}
+		)
+	</insert>
+	<!-- 删除-->
+	<delete id="delete" parameterType="Map">
+       		 delete from sd_user
+		where 
+    	sd_user_id = #{sd_user_id}
+	</delete>
+	<!-- 修改 -->
+	<update id="edit" parameterType="Map">
+		update  sd_user
+		<trim suffixOverrides=","> 
+    		<set > 
+			   <if test="userid != null and userid != ''" >
+        		userid = #{userid,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="hyb_count != null and hyb_count != ''" >
+        		hyb_count = #{hyb_count,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="hyb_succ_count != null and hyb_succ_count != ''" >
+        		hyb_succ_count = #{hyb_succ_count,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="typezh != null and typezh != ''" >
+        		typezh = #{typezh,jdbcType=VARCHAR}
+      		   </if>
+		 	</set>
+    	</trim>
+			where
+		userid = #{userid}
+	</update>
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="Map" resultType="Map">
+		select 
+			<include refid="Base_Column_List" />
+		from 
+			sd_user a
+		where 1=1
+			<if test="sd_user_id != null and sd_user_id != ''">
+				and a.sd_user_id = #{sd_user_id}
+			</if>
+			<if test="userid != null and userid != ''">
+				and a.userid = #{userid}
+			</if>
+			<if test="hyb_count != null and hyb_count != ''">
+				and a.hyb_count = #{hyb_count}
+			</if>
+			<if test="hyb_succ_count != null and hyb_succ_count != ''">
+				and a.hyb_succ_count = #{hyb_succ_count}
+			</if>
+			<if test="typezh != null and typezh != ''">
+				and a.typezh = #{typezh}
+			</if>
+	</select>
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="Map" resultType="Map">
+		select
+			<include refid="Base_Column_List" />
+		from sd_user a
+		where 1=1
+			<if test="sd_user_id != null and sd_user_id != ''">
+				and a.sd_user_id = #{sd_user_id}
+			</if>
+			<if test="userid != null and userid != ''">
+				and a.userid = #{userid}
+			</if>
+			<if test="hyb_count != null and hyb_count != ''">
+				and a.hyb_count = #{hyb_count}
+			</if>
+			<if test="hyb_succ_count != null and hyb_succ_count != ''">
+				and a.hyb_succ_count = #{hyb_succ_count}
+			</if>
+			<if test="typezh != null and typezh != ''">
+				and a.typezh = #{typezh}
+			</if>
+	</select>
+	<select id="queryCount" parameterType="Map" resultType="int">
+		select 
+    			count(a.sd_user_id) as count
+		from sd_user a
+		where 1=1
+			<if test="sd_user_id != null and sd_user_id != ''">
+				and a.sd_user_id = #{sd_user_id}
+			</if>
+			<if test="userid != null and userid != ''">
+				and a.userid = #{userid}
+			</if>
+			<if test="hyb_count != null and hyb_count != ''">
+				and a.hyb_count = #{hyb_count}
+			</if>
+			<if test="hyb_succ_count != null and hyb_succ_count != ''">
+				and a.hyb_succ_count = #{hyb_succ_count}
+			</if>
+			<if test="typezh != null and typezh != ''">
+				and a.typezh = #{typezh}
+			</if>
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+       		 delete from sd_user
+		where 
+    	sd_user_id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+	
+</mapper>

@@ -1,0 +1,38 @@
+server:
+  port: 8787
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+    jedis:
+      pool:
+        max-active: 1
+        max-wait: -1
+        max-idle: 1
+        min-idle: 0
+    timeout: 0
+  common-db:
+     driverClassName: com.mysql.jdbc.Driver
+     url: jdbc:mysql://39.96.161.245:3306/test?useUnicode=true&characterEncoding=UTF-8
+     username: root
+     password: Lie1998..
+     initialSize: 3
+     minIdle: 3
+     maxActive: 100
+     maxWait: 60000
+     timeBetweenEvictionRunsMillis: 60000
+     minEvictableIdleTimeMillis: 300000
+     validationQuery: SELECT 1 FROM DUAL
+     testWhileIdle: true
+     testOnBorrow: false
+     testOnReturn: false
+     filters: stat
+  thymeleaf:
+    prefix: classpath:/static/
+logging:
+  level:
+    com.scheduling.dao: info # debug info warn error
+token:
+  expire: 43200000

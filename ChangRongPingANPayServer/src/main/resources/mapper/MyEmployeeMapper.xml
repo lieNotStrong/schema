@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MyEmployeeMapper">
+    <sql id="Base_Column_List">
+			a.*
+  	</sql>
+
+
+    <!-- 判断是否是公司用户  -->
+    <!-- 通过公司ID获取员工姓名 职位 状态 评分 -->
+    <select id="findByCidU" parameterType="Map" resultType="Map">
+       SELECT
+CASE
+
+WHEN
+	(
+	( SELECT a.score FROM sd_user a WHERE sd_comuser.userid = a.user_id AND a.del_boolean != '2' ) IS NULL
+	OR ( SELECT a.score FROM sd_user a WHERE sd_comuser.userid = a.user_id AND a.del_boolean != '2' ) = ''
+	) THEN
+		'0.0' ELSE ( SELECT a.score FROM sd_user a WHERE sd_comuser.userid = a.user_id AND a.del_boolean != '2' )
+	END AS score,
+	( SELECT a.nikename FROM sd_user a WHERE sd_comuser.userid = a.user_id AND a.del_boolean != '2' ) AS nikename,
+	( SELECT a.position_name FROM sd_positisdon a WHERE a.positionid = sd_comuser.positionid ) AS position_name,
+	sd_comuser.if_active,
+	sd_comuser.userid
+           FROM
+	       sd_comuser
+        WHERE
+        <if test="companyuserid != null and companyuserid != ''">
+           sd_comuser.companyuserid = #{companyuserid}
+        </if>
+    </select>
+
+
+    <!-- 员工个人信息（入职离职时间 身份证正反面  职位） -->
+    <!-- 查询通过员工ID-->
+    <select id="findByUid" parameterType="Map" resultType="Map">
+        select
+        sd_comuser.userid,
+        sd_comuser.entrytime,
+        sd_comuser.exittime,
+        sd_comuser.idcard_front,
+        sd_comuser.idcard_reverse,
+        sd_user.nikename,
+        sd_comuser.positionid,
+        sd_positisdon.position_name
+        from
+        sd_comuser
+        inner join
+        sd_user
+        on
+        sd_comuser.userid = sd_user.user_id
+        inner join
+        sd_positisdon
+        on
+        sd_comuser.positionid = sd_positisdon.positionid
+        and
+        sd_comuser.companyuserid = sd_positisdon.comuserid
+        where 1=1
+        <if test="userid != null and userid != ''">
+            and sd_comuser.userid = #{userid}
+        </if>
+        <if test="companyuserid != null and companyuserid != ''">
+            and sd_comuser.companyuserid = #{companyuserid}
+        </if>
+    </select>
+    <!-- 通过员工ID 公司id修改-->
+    <!-- 修改 -->
+    <update id="editUser" parameterType="Map">
+        update  sd_comuser
+        <trim suffixOverrides=",">
+            <set >
+                <if test="entrytime != null and entrytime != ''" >
+                    sd_comuser.entrytime = #{entrytime,jdbcType=VARCHAR},
+                </if>
+                <if test="exittime != null and exittime != ''" >
+                    sd_comuser.exittime = #{exittime,jdbcType=VARCHAR},
+                </if>
+                <if test="positionid != null and positionid != ''" >
+                    sd_comuser.positionid = #{positionid,jdbcType=VARCHAR},
+                </if>
+
+
+            </set>
+            where
+            sd_comuser.userid = #{userid}
+            and
+            sd_comuser.companyuserid = #{companyuserid}
+        </trim>
+    </update>
+    <!-- 修改身份证正面-->
+    <update id="editUserImgF" parameterType="Map">
+        update
+        sd_comuser
+        <trim suffixOverrides=",">
+            <set>
+                <if test="idcard_front != null and idcard_front != ''" >
+                    sd_comuser.idcard_front = #{idcard_front,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where
+            sd_comuser.userid = #{userid}
+            AND
+            sd_comuser.companyuserid = #{companyuserid}
+        </trim>
+    </update>
+    <!-- 修改身份证反面-->
+    <update id="editUserImgS" parameterType="Map">
+        update
+        sd_comuser
+        <trim suffixOverrides=",">
+            <set>
+                <if test="idcard_reverse != null and idcard_reverse != ''" >
+                    sd_comuser.idcard_reverse = #{idcard_reverse,jdbcType=VARCHAR}
+                </if>
+            </set>
+            where
+            sd_comuser.userid = #{userid}
+            AND
+            sd_comuser.companyuserid = #{companyuserid}
+        </trim>
+    </update>
+    <!-- 修改员工信息后如果离职日期小于系统时间 将状态改为已离职 -->
+    <update id="editActiveY" parameterType="Map">
+        update  sd_comuser
+        <trim suffixOverrides=",">
+            <set >
+                    sd_comuser.if_active = '2',
+            </set>
+        </trim>
+        where
+        sd_comuser.userid = #{userid}
+    </update>
+    <!-- 修改员工信息后如果离职日期小于系统时间 将状态改为已离职 -->
+    <update id="editActiveN" parameterType="Map">
+        update  sd_comuser
+        <trim suffixOverrides=",">
+            <set >
+                sd_comuser.if_active = '1',
+            </set>
+        </trim>
+        where
+        sd_comuser.userid = #{userid}
+    </update>
+
+
+
+    <!-- 企业修改员工状态-->
+    <update id="editActiveTwo" parameterType="Map">
+        update  sd_comuser
+        <trim suffixOverrides=",">
+            <set >
+                <if test="if_active != null and if_active != ''" >
+                    sd_comuser.if_active = #{if_active,jdbcType=VARCHAR},
+                </if>
+            </set>
+        </trim>
+        where
+        sd_comuser.userid = #{userid}
+    </update>
+
+
+
+    <!-- 企业对职位进行修改删除 -->
+    <!-- 通过企业ID获取企业职位 -->
+    <!-- 查找 -->
+
+    <select id="findByCidP" parameterType="Map" resultType="Map">
+        select
+        sd_positisdon.*
+        from
+        sd_positisdon
+        where sd_positisdon.del_boolean = '2'
+        <if test="comuserid != null and comuserid != ''">
+            and sd_positisdon.comuserid = #{comuserid}
+        </if>
+    </select>
+    <!-- 添加 -->
+    <insert id="savePositisdon" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_positisdon(
+			positionid,
+			position_name,
+			createtime,
+			del_boolean,
+			comuserid
+		) values (
+			#{positionid,jdbcType=VARCHAR},
+			#{position_name,jdbcType=VARCHAR},
+			#{createtime,jdbcType=VARCHAR},
+			#{del_boolean,jdbcType=VARCHAR},
+			#{comuserid,jdbcType=VARCHAR}
+			)
+	</insert>
+
+
+    <!-- 删除职位  需要判断 当前公司中职位 是否还存在员工 -->
+    <!-- 查找是否存在员工 -->
+    <select id="findByCidUT" parameterType="Map" resultType="Map">
+        select
+        sd_comuser.if_active
+        from
+        sd_comuser
+        left join
+        sd_positisdon
+        on
+        sd_positisdon.positionid = sd_comuser.positionid
+        and
+        sd_positisdon.comuserid = sd_comuser.companyuserid
+        where 1=1
+        <if test="comuserid != null and comuserid != ''">
+            and sd_positisdon.comuserid = #{comuserid}
+        </if>
+        <if test="positionid!= null and positionid != ''">
+            and sd_positisdon.positionid = #{positionid}
+        </if>
+    </select>
+    <!-- 删除职位 修改职位的状态-->
+    <update id="updatePositisdon" parameterType="Map">
+        update  sd_positisdon
+        <trim suffixOverrides=",">
+            <set >
+                <if test="del_boolean != null and del_boolean != ''" >
+                    sd_positisdon.del_boolean = #{del_boolean,jdbcType=VARCHAR},
+                </if>
+            </set>
+        </trim>
+        where
+        sd_positisdon.positionid = #{positionid}
+    </update>
+
+
+    <!-- 添加关联信息 -->
+    <insert id="saveComuser" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_comuser(
+			com_userid,
+			companyuserid,
+			userid,
+			positionid,
+			if_active,
+			entrytime,
+			exittime,
+			idcard_front,
+			idcard_reverse
+		) values (
+			#{com_userid,jdbcType=VARCHAR},
+			#{companyuserid,jdbcType=VARCHAR},
+			#{userid,jdbcType=VARCHAR},
+			#{positionid,jdbcType=VARCHAR},
+			#{if_active,jdbcType=VARCHAR},
+			#{entrytime,jdbcType=VARCHAR},
+			#{exittime,jdbcType=VARCHAR},
+			#{idcard_front,jdbcType=VARCHAR},
+			#{idcard_reverse,jdbcType=VARCHAR}
+			)
+	</insert>
+    <!--模糊查询，判断职位是否重复-->
+    <select id="finddim" parameterType="Map" resultType="Map">
+        SELECT
+        sd_positisdon.position_name
+           FROM
+	       sd_positisdon
+         WHERE 1=1
+             <if test="comuserid!= null and comuserid != ''">
+             AND sd_positisdon.comuserid = #{comuserid,jdbcType=VARCHAR}
+             </if>
+        <if test="position_name!= null and position_name != ''">
+	       AND sd_positisdon.position_name like "%"#{position_name}"%"
+        </if>
+
+    </select>
+      <!--修改职位-->
+    <update id="edit" parameterType="Map">
+        update  sd_positisdon
+        <trim suffixOverrides=",">
+            <set>
+                <if test="position_name != null and position_name != ''" >
+                    sd_positisdon.position_name= #{position_name,jdbcType=VARCHAR},
+                </if>
+            </set>
+        </trim>
+       WHERE
+        sd_positisdon.positionid = #{positionid}
+
+    </update>
+
+    <!--查找员工职位-->
+    <select id="findUserHaveComuser" parameterType="Map" resultType="Map">
+        select sd_comuser.*
+        from sd_comuser
+        where sd_comuser.companyuserid = #{comuserid}
+        AND sd_comuser.userid = #{userid}
+    </select>
+</mapper>

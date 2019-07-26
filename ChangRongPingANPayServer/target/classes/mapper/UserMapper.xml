@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UserMapper">
+	<sql id="Base_Column_List" >
+			a.*
+  	</sql>
+
+	<!-- 新增-->
+	<insert id="save" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_user(
+			user_id,
+			phone,
+			password,
+			nikename,
+			headimg,
+			user_type,
+			idcard_front,
+			idcard_reverse,
+			createtime,
+			del_boolean,
+			score,
+			wxnum,
+			openid,
+			formid
+		) values (
+			#{user_id,jdbcType=VARCHAR},
+			#{phone,jdbcType=VARCHAR},
+			#{password,jdbcType=VARCHAR},
+			#{nikename,jdbcType=VARCHAR},
+			#{headimg,jdbcType=VARCHAR},
+			#{user_type,jdbcType=VARCHAR},
+			#{idcard_front,jdbcType=VARCHAR},
+			#{idcard_reverse,jdbcType=VARCHAR},
+			#{createtime},
+			#{del_boolean,jdbcType=VARCHAR},
+			#{score,jdbcType=VARCHAR},
+			#{wxnum,jdbcType=VARCHAR},
+			#{openid,jdbcType=VARCHAR},
+			#{formid}
+			)
+	</insert>
+	<!-- 删除-->
+	<delete id="delete" parameterType="Map">
+       		 delete from sd_user
+		where 
+    	sd_user_id = #{sd_user_id}
+	</delete>
+	<!-- 修改 -->
+	<update id="edit" parameterType="Map">
+		update  sd_user
+		<trim suffixOverrides=",">
+    		<set >
+			   <if test="user_id != null and user_id != ''" >
+        		user_id = #{user_id,jdbcType=VARCHAR},
+      		   </if>
+				<if test="formid != null and formid != ''" >
+					formid = #{formid,jdbcType=VARCHAR},
+				</if>
+
+			   <if test="hyb_count != null and hyb_count != ''" >
+        		hyb_count = #{hyb_count,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="hyb_succ_count != null and hyb_succ_count != ''" >
+        		hyb_succ_count = #{hyb_succ_count,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="typezh != null and typezh != ''" >
+        		typezh = #{typezh,jdbcType=VARCHAR}
+      		   </if>
+		 	</set>
+    	</trim>
+			where
+		user_id = #{user_id}
+	</update>
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="Map" resultType="Map">
+		select
+			<include refid="Base_Column_List" />
+		from
+			sd_user a
+		where 1=1
+			<if test="user_id != null and user_id != ''">
+				and a.user_id = #{user_id}
+			</if>
+			<if test="phone != null and phone != ''">
+				and a.phone = #{phone}
+			</if>
+			<if test="openid != null and openid != ''">
+				and a.openid = #{openid}
+			</if>
+	</select>
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="Map" resultType="Map">
+		select
+			<include refid="Base_Column_List" />
+		from sd_user a
+		where a.del_boolean=1
+			<if test="sd_user_id != null and sd_user_id != ''">
+				and a.sd_user_id = #{sd_user_id}
+			</if>
+			<if test="user_id != null and user_id != ''">
+				and a.user_id = #{user_id}
+			</if>
+			<if test="hyb_count != null and hyb_count != ''">
+				and a.hyb_count = #{hyb_count}
+			</if>
+		<if test="user_type != null and user_type != ''">
+			and a.user_type = #{user_type}
+		</if>
+
+			<if test="hyb_succ_count != null and hyb_succ_count != ''">
+				and a.hyb_succ_count = #{hyb_succ_count}
+			</if>
+			<if test="typezh != null and typezh != ''">
+				and a.typezh = #{typezh}
+			</if>
+	</select>
+	<select id="queryCount" parameterType="Map" resultType="int">
+		select
+    			count(a.sd_user_id) as count
+		from sd_user a
+		where 1=1
+			<if test="sd_user_id != null and sd_user_id != ''">
+				and a.sd_user_id = #{sd_user_id}
+			</if>
+			<if test="user_id != null and user_id != ''">
+				and a.user_id = #{user_id}
+			</if>
+			<if test="hyb_count != null and hyb_count != ''">
+				and a.hyb_count = #{hyb_count}
+			</if>
+			<if test="hyb_succ_count != null and hyb_succ_count != ''">
+				and a.hyb_succ_count = #{hyb_succ_count}
+			</if>
+			<if test="typezh != null and typezh != ''">
+				and a.typezh = #{typezh}
+			</if>
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+       		 delete from sd_user
+		where
+    	sd_user_id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+	<!--查询用户首页排班信息-->
+	<select id="getListAll" parameterType="Map" resultType="Map">
+		SELECT
+		sde.starttime,
+		sde.endtime,
+		sdc.workforce_date,
+		(select date_format(sdc.workforce_date,'%W')) week,
+		(
+		SELECT
+		AVG(com.score)
+		FROM
+		sd_user su
+		LEFT JOIN sd_workforce_employee sde ON su.user_id	= sde.userid
+		LEFT JOIN sd_workforce_company sdc ON sde.workforce_company_id = sdc.workforce_company_id
+		LEFT JOIN sd_comment com ON sdc.userid = com.comuserid
+		)scoreAvg
+		FROM
+		sd_user su
+		LEFT JOIN sd_workforce_employee sde ON su.user_id = sde.userid
+		LEFT JOIN sd_workforce_company sdc ON sde.workforce_company_id = sdc.workforce_company_id
+		LEFT JOIN sd_positisdon sp ON sdc.positionid = sp.positionid
+		WHERE
+		1=1
+		<if test="user_id != null and user_id != ''">
+			and su.user_id = #{user_id}
+		</if>
+		<if test="user_id != null and user_id != ''">
+			and su.user_id = #{user_id}
+		</if>
+		ORDER BY sdc.workforce_date ASC
+	</select>
+	<!--获取用户信息-->
+	<select id="getUserInfo" parameterType="Map" resultType="Map">
+		SELECT
+		sd_workforce_employee_zhou.*,
+		sd_user.nikename,
+		(select date_format(sd_workforce_employee_zhou.workforce_date,'%W')) week
+		FROM
+		sd_workforce_employee_zhou
+
+		INNER JOIN sd_user  ON sd_user.user_id = sd_workforce_employee_zhou.userid
+
+		where
+		sd_workforce_employee_zhou.workforce_date
+			between #{startdate} and #{enddate}
+			and sd_workforce_employee_zhou.userid = #{user_id}
+			and sd_workforce_employee_zhou.companyuserid = #{comid}
+
+	</select>
+
+	<select id="getAllNotice" parameterType="Map" resultType="Map">
+			select * from sd_notice where userid=#{user_id} AND status &lt; '2'
+	</select>
+
+	<update id="clickNotice" parameterType="Map">
+		update  sd_notice
+		<trim suffixOverrides=",">
+			<set >
+				<if test="noticeid != null and noticeid != ''" >
+					userid = #{userid,jdbcType=VARCHAR},
+				</if>
+				<if test="title != null and title != ''" >
+					title = #{title,jdbcType=VARCHAR},
+				</if>
+				<if test="content != null and content != ''" >
+					content = #{content,jdbcType=VARCHAR},
+				</if>
+				<if test="createtime != null and createtime != ''" >
+					createtime = #{createtime,jdbcType=VARCHAR},
+				</if>
+				<if test="userid != null and userid != ''" >
+					userid = #{userid,jdbcType=VARCHAR},
+				</if>
+				<if test="status != null and status != ''" >
+					status = #{status,jdbcType=VARCHAR},
+				</if>
+				<if test="url != null and url != ''" >
+					url = #{url,jdbcType=VARCHAR},
+				</if>
+				<if test="workforce_employee_id != null and workforce_employee_id != ''" >
+					workforce_employee_id = #{workforce_employee_id,jdbcType=VARCHAR}
+				</if>
+			</set>
+		</trim>
+		where
+		noticeid = #{noticeid}
+	</update>
+	<!--查找员工所在公司-->
+	<select id="queryCompany" parameterType="Map" resultType="Map">
+        SELECT
+        su.user_id,
+        su.nikename
+        FROM
+        sd_user su
+        WHERE
+        su.user_type = '1'
+        AND
+        su.user_id IN ( SELECT com.companyuserid FROM sd_comuser com WHERE com.userid = #{userid} )
+
+	</select>
+	<!--查找公司全部员工-->
+	<select id="queryUserId" parameterType="Map" resultType="Map">
+		select u.user_id,u.formid,u.openid
+		from sd_user u
+		where user_id IN (select
+			userid
+			from
+			sd_comuser
+				where
+	    sd_comuser.companyuserid = #{userid})
+
+	</select>
+
+
+    <!--查找公司员工数量-->
+    <select id="findCount" parameterType="Map" resultType="Map">
+		select COUNT(*) from sd_comuser com where com.companyuserid=#{userid}
+	</select>
+
+	<!--查找公司名称-->
+	<select id="findNikename" parameterType="Map" resultType="Map">
+		select su.nikename from sd_user su where user_id=#{userid}
+	</select>
+
+    <!--员工端登陆后 查找员工信息  名称和职位 平均分-->
+    <select id="findUserINFO" parameterType="Map" resultType="Map">
+        SELECT
+        sd_comuser.userid,
+        sd_comuser.positionid,
+        sd_user.nikename,
+        sd_positisdon.position_name,
+        sd_comuser.score
+        FROM
+        sd_comuser
+        INNER join
+        sd_user
+        ON
+        sd_user.user_id = sd_comuser.userid
+        INNER join
+        sd_positisdon
+        ON
+        sd_positisdon.positionid = sd_comuser.positionid
+        where
+        sd_comuser.userid = #{user_id}
+        and
+        sd_comuser.companyuserid = #{comid}
+    </select>
+
+    <!--查找登陆员工职位id-->
+    <select id="findUseridPid" parameterType="Map" resultType="Map">
+        select sd_comuser.positionid
+        from sd_comuser
+        where
+        sd_comuser.userid = #{userid}
+        and
+        sd_comuser .companyuserid = #{comid}
+    </select>
+
+
+
+
+
+
+</mapper>

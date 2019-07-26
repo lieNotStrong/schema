@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WorkemployeeMapper">
+	<sql id="Base_Column_List" >
+			a.*
+  	</sql>
+	
+	<!-- 新增-->
+	<insert id="save" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_workforce_employee(
+			workforce_employee_id,
+			workforce_company_id,
+			userid,
+			starttime,
+			sametable,
+			endtime,
+			createtime,
+			confirm_boolean,
+		workforce_date
+		) values (
+			#{workforce_employee_id,jdbcType=VARCHAR},
+			#{workforce_company_id,jdbcType=VARCHAR},
+			#{userid,jdbcType=VARCHAR},
+			#{starttime,jdbcType=VARCHAR},
+			#{sametable,jdbcType=VARCHAR},
+			#{endtime,jdbcType=VARCHAR},
+			#{createtime},
+		  	#{confirm_boolean,jdbcType=VARCHAR},
+		  	#{workforce_date,jdbcType=VARCHAR}
+			)
+	</insert>
+	<!-- 删除-->
+	<delete id="delete" parameterType="Map">
+       		 delete from sd_user
+		where 
+    	sd_user_id = #{sd_user_id}
+	</delete>
+	<!-- 修改 -->
+	<update id="edit" parameterType="Map">
+		update  sd_workforce_employee
+		<trim suffixOverrides=","> 
+    		<set > 
+			   <if test="workforce_employee_id != null and workforce_employee_id != ''" >
+				   workforce_employee_id = #{workforce_employee_id,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="sametable != null and sametable != ''" >
+				   sametable = #{sametable,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="workforce_company_id != null and workforce_company_id != ''" >
+				   workforce_company_id = #{workforce_company_id,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="userid != null and userid != ''" >
+				   userid = #{userid,jdbcType=VARCHAR}
+      		   </if>
+			   <if test="starttime != null and starttime != ''" >
+				   starttime = #{starttime,jdbcType=VARCHAR}
+      		   </if>
+			   <if test="endtime != null and endtime != ''" >
+				   endtime = #{endtime,jdbcType=VARCHAR}
+      		   </if>
+			   <if test="createtime != null and createtime != ''" >
+				   createtime = #{createtime,jdbcType=VARCHAR}
+      		   </if>
+			   <if test="confirm_boolean != null and confirm_boolean != ''" >
+				   confirm_boolean = #{confirm_boolean,jdbcType=VARCHAR}
+      		   </if>
+		 	</set>
+    	</trim>
+			where
+		userid = #{userid}
+	</update>
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="Map" resultType="Map">
+		select 
+			<include refid="Base_Column_List" />
+		from 
+			sd_user a
+		where 1=1
+			<if test="softcommentid != null and softcommentid != ''">
+				and a.softcommentid = #{softcommentid}
+			</if>
+			<if test="content != null and content != ''">
+				and a.content = #{content}
+			</if>
+			<if test="support_num != null and support_num != ''">
+				and a.support_num = #{support_num}
+			</if>
+			<if test="createtime != null and createtime != ''">
+				and a.createtime = #{createtime}
+			</if>
+	</select>
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="Map" resultType="Map">
+		select
+			<include refid="Base_Column_List" />
+		,b.scoresum
+		from sd_workforce_employee a
+		left join (select userid, sum(score) as scoresum from sd_comment group by userid ) b on a.userid=b.userid
+		where 1=1
+			<if test="workforce_employee_id != null and workforce_employee_id != ''">
+				and a.workforce_employee_id = #{workforce_employee_id}
+			</if>
+			<if test="sametable != null and sametable != ''">
+				and a.sametable = #{sametable}
+			</if>
+			<if test="workforce_company_id != null and workforce_company_id != ''">
+				and a.workforce_company_id = #{workforce_company_id}
+			</if>
+			<if test="userid != null and userid != ''">
+				and a.userid = #{userid}
+			</if>
+			<if test="starttime != null and starttime != ''">
+				and a.starttime = #{starttime}
+			</if>
+			<if test="endtime != null and endtime != ''">
+				and a.endtime = #{endtime}
+			</if>
+			<if test="createtime != null and createtime != ''">
+				and a.createtime = #{createtime}
+			</if>
+			<if test="confirm_boolean != null and confirm_boolean != ''">
+				and a.confirm_boolean = #{confirm_boolean}
+			</if>
+		order by b.scoresum desc
+	</select>
+	<!-- 列表(获取需评分员工) -->
+	<select id="getScoreMan" parameterType="Map" resultType="Map">
+		select
+			<include refid="Base_Column_List" />
+		from sd_softcomment a
+		where 1=1
+			<if test="softcommentid != null and softcommentid != ''">
+				and a.softcommentid = #{softcommentid}
+			</if>
+			<if test="content != null and content != ''">
+				and a.content = #{content}
+			</if>
+			<if test="support_num != null and support_num != ''">
+				and a.support_num = #{support_num}
+			</if>
+			<if test="createtime != null and createtime != ''">
+				and a.createtime = #{createtime}
+			</if>
+	</select>
+
+
+
+
+
+
+	<select id="queryCount" parameterType="Map" resultType="int">
+		select 
+    			count(a.sd_user_id) as count
+		from sd_user a
+		where 1=1
+			<if test="sd_user_id != null and sd_user_id != ''">
+				and a.sd_user_id = #{sd_user_id}
+			</if>
+			<if test="userid != null and userid != ''">
+				and a.userid = #{userid}
+			</if>
+			<if test="hyb_count != null and hyb_count != ''">
+				and a.hyb_count = #{hyb_count}
+			</if>
+			<if test="hyb_succ_count != null and hyb_succ_count != ''">
+				and a.hyb_succ_count = #{hyb_succ_count}
+			</if>
+			<if test="typezh != null and typezh != ''">
+				and a.typezh = #{typezh}
+			</if>
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+       		 delete from sd_user
+		where 
+    	sd_user_id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+	<!--点击通知修改员工排班状态-->
+	<update id="modifyState" parameterType="Map">
+		update  sd_workforce_employee
+		<trim suffixOverrides=",">
+			<set >
+				<if test="workforce_employee_id != null and workforce_employee_id != ''" >
+					workforce_employee_id = #{workforce_employee_id,jdbcType=VARCHAR},
+				</if>
+				<if test="sametable != null and sametable != ''" >
+					sametable = #{sametable,jdbcType=VARCHAR},
+				</if>
+				<if test="workforce_company_id != null and workforce_company_id != ''" >
+					workforce_company_id = #{workforce_company_id,jdbcType=VARCHAR},
+				</if>
+				<if test="userid != null and userid != ''" >
+					userid = #{userid,jdbcType=VARCHAR},
+				</if>
+				<if test="starttime != null and starttime != ''" >
+					starttime = #{starttime,jdbcType=VARCHAR},
+				</if>
+				<if test="endtime != null and endtime != ''" >
+					endtime = #{endtime,jdbcType=VARCHAR},
+				</if>
+				<if test="createtime != null and createtime != ''" >
+					createtime = #{url,jdbcType=VARCHAR},
+				</if>
+				<if test="confirm_boolean != null and confirm_boolean != ''" >
+					confirm_boolean = #{confirm_boolean,jdbcType=VARCHAR}
+				</if>
+			</set>
+		</trim>
+		where
+		workforce_employee_id = #{workforce_employee_id}
+	</update>
+
+	<!-- 新增-->
+	<insert id="saveSystem" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_workforce_employee_system(
+		workforce_employee_id,
+		workforce_company_id,
+		userid,
+		starttime,
+		sametable,
+		endtime,
+		createtime,
+		confirm_boolean,
+		workforce_date
+		) values (
+		#{workforce_employee_id,jdbcType=VARCHAR},
+		#{workforce_company_id,jdbcType=VARCHAR},
+		#{userid,jdbcType=VARCHAR},
+		#{starttime,jdbcType=VARCHAR},
+		#{sametable,jdbcType=VARCHAR},
+		#{endtime,jdbcType=VARCHAR},
+		#{createtime},
+		#{confirm_boolean,jdbcType=VARCHAR},
+		#{workforce_date,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<!-- 查找参与公司本次排班的用户平均分  即用户id-->
+	<select id="findAvgScore" parameterType="Map" resultType="Map">
+		select
+		sd_comuser.score,
+         sd_workforce_employee.*
+		from
+		sd_comuser
+		INNER JOIN
+		sd_workforce_employee
+		ON
+		sd_comuser.userid = sd_workforce_employee.userid
+		where
+		sd_comuser.companyuserid = #{comuserid}
+		AND
+		sd_workforce_employee.workforce_company_id = #{workforce_company_id}
+         ORDER BY
+         sd_comuser.score
+       DESC
+	</select>
+
+	<!-- 修改 -->
+	<update id="editSystem" parameterType="Map">
+		update  sd_workforce_employee_system
+		<trim suffixOverrides=",">
+			<set >
+
+				<if test="confirm_boolean != null and confirm_boolean != ''" >
+					confirm_boolean = #{confirm_boolean,jdbcType=VARCHAR}
+				</if>
+			</set>
+		</trim>
+		where
+		workforce_company_id = #{workforce_company_id}
+	</update>
+
+	<!-- 新增-->
+	<insert id="saveZhou" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_workforce_employee_zhou(
+		workforce_employee_id,
+		workforce_company_id,
+		userid,
+		starttime,
+		sametable,
+		endtime,
+		createtime,
+		confirm_boolean,
+		workforce_date,
+		companyuserid
+		) values (
+		#{workforce_employee_id,jdbcType=VARCHAR},
+		#{workforce_company_id,jdbcType=VARCHAR},
+		#{userid,jdbcType=VARCHAR},
+		#{starttime,jdbcType=VARCHAR},
+		#{sametable,jdbcType=VARCHAR},
+		#{endtime,jdbcType=VARCHAR},
+		#{createtime},
+		#{confirm_boolean,jdbcType=VARCHAR},
+		#{workforce_date,jdbcType=VARCHAR},
+		#{companyuserid,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<!-- 修改周排班时间 -->
+	<update id="editZhou" parameterType="Map">
+		update  sd_workforce_employee_zhou
+		<trim suffixOverrides=",">
+			<set >
+				<if test="confirm_boolean != null and confirm_boolean != ''" >
+					confirm_boolean = #{confirm_boolean,jdbcType=VARCHAR},
+				</if>
+				<if test="starttime != null and starttime != ''" >
+					starttime = #{starttime,jdbcType=VARCHAR},
+				</if>
+				<if test="endtime != null and endtime != ''" >
+					endtime = #{endtime,jdbcType=VARCHAR},
+				</if>
+				<if test="createtime != null and createtime != ''" >
+					createtime = #{createtime,jdbcType=VARCHAR},
+				</if>
+			</set>
+		</trim>
+		where
+		workforce_employee_id = #{workforce_employee_id}
+	</update>
+
+
+
+	<!-- 修改周排班状态 -->
+	<update id="editZhouZT" parameterType="Map">
+		update  sd_workforce_employee_zhou
+		<trim suffixOverrides=",">
+			<set >
+				<if test="confirm_boolean != null and confirm_boolean != ''" >
+					confirm_boolean = #{confirm_boolean,jdbcType=VARCHAR},
+				</if>
+				<if test="createtime != null and createtime != ''" >
+					createtime = #{createtime,jdbcType=VARCHAR},
+				</if>
+			</set>
+		</trim>
+		where
+		userid = #{userid}
+		AND
+		workforce_date = #{workforce_date}
+		AND
+		companyuserid = #{companyuserid}
+	</update>
+
+
+
+</mapper>

@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SoftcommentMapper">
+	<sql id="Base_Column_List" >
+			a.*
+  	</sql>
+	
+	<!-- 新增-->
+	<insert id="save" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_softcomment(
+			softcommentid,
+			content,
+			support_num,
+			createtime,
+			userid
+		) values (
+			#{softcommentid,jdbcType=VARCHAR},
+			#{content,jdbcType=VARCHAR},
+			#{support_num,jdbcType=VARCHAR},
+			#{createtime},
+		    #{userid,jdbcType=VARCHAR}
+			)
+	</insert>
+	<!-- 新增-->
+	<insert id="saveTwo" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_softcomment_user(
+		id,
+		softcommentid,
+		userid,
+		createtime
+		) values (
+		#{id,jdbcType=VARCHAR},
+		#{softcommentid,jdbcType=VARCHAR},
+		#{userid,jdbcType=VARCHAR},
+		#{createtime}
+		)
+	</insert>
+
+	<!-- 删除-->
+	<delete id="delete" parameterType="Map">
+       		 delete from sd_user
+		where 
+    	sd_user_id = #{sd_user_id}
+	</delete>
+	<!-- 修改 -->
+
+	<update id="edit2" parameterType="Map">
+		update  sd_softcomment
+		<trim suffixOverrides=",">
+			<set >
+				<if test="content != null and content != ''" >
+					content = #{content,jdbcType=VARCHAR},
+				</if>
+				<if test="support_num != null and support_num != ''" >
+					support_num = #{support_num,jdbcType=VARCHAR},
+				</if>
+				<if test="createtime != null and createtime != ''" >
+					createtime = #{createtime,jdbcType=VARCHAR}
+				</if>
+			</set>
+		</trim>
+		where
+		softcommentid = #{softcommentid}
+	</update>
+	<update id="edit" parameterType="Map">
+		update  sd_softcomment
+		<trim suffixOverrides=","> 
+    		<set >
+			   <if test="content != null and content != ''" >
+				   content = #{content,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="support_num != null and support_num != ''" >
+				   support_num = #{support_num,jdbcType=VARCHAR},
+      		   </if>
+			   <if test="createtime != null and createtime != ''" >
+				   createtime = #{createtime,jdbcType=VARCHAR}
+      		   </if>
+		 	</set>
+    	</trim>
+			where
+		softcommentid = #{softcommentid}
+	</update>
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="Map" resultType="Map">
+		select 
+			<include refid="Base_Column_List" />
+		from
+			sd_user a
+		where 1=1
+			<if test="softcommentid != null and softcommentid != ''">
+				and a.softcommentid = #{softcommentid}
+			</if>
+			<if test="content != null and content != ''">
+				and a.content = #{content}
+			</if>
+			<if test="support_num != null and support_num != ''">
+				and a.support_num = #{support_num}
+			</if>
+			<if test="createtime != null and createtime != ''">
+				and a.createtime = #{createtime}
+			</if>
+	</select>
+	<!-- 通过ID获取数据 -->
+	<select id="findById2" parameterType="Map" resultType="Map">
+		select
+			<include refid="Base_Column_List" />
+		from
+		sd_softcomment a
+		where 1=1
+			<if test="softcommentid != null and softcommentid != ''">
+				and a.softcommentid = #{softcommentid}
+			</if>
+			<if test="content != null and content != ''">
+				and a.content = #{content}
+			</if>
+			<if test="support_num != null and support_num != ''">
+				and a.support_num = #{support_num}
+			</if>
+			<if test="createtime != null and createtime != ''">
+				and a.createtime = #{createtime}
+			</if>
+	</select>
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="Map" resultType="Map">
+		select
+		<include refid="Base_Column_List" />
+		from sd_softcomment a
+		left join sd_softcomment_user b on a.softcommentid=b.softcommentid
+		where 1=1
+		<if test="softcommentid != null and softcommentid != ''">
+			and a.softcommentid = #{softcommentid}
+		</if>
+		<if test="userid != null and userid != ''">
+			and b.userid = #{userid}
+		</if>
+		<if test="content != null and content != ''">
+			and a.content = #{content}
+		</if>
+		<if test="support_num != null and support_num != ''">
+			and a.support_num = #{support_num}
+		</if>
+		<if test="createtime != null and createtime != ''">
+			and a.createtime = #{createtime}
+		</if>
+		order by
+		a.support_num
+		DESC
+	</select>
+	<!-- 列表(全部) -->
+	<select id="listAll3" parameterType="Map" resultType="Map">
+		select
+		<include refid="Base_Column_List" />  ,
+		b.id
+		from sd_softcomment a
+		left join sd_softcomment_user b on a.softcommentid=b.softcommentid
+		where 1=1
+		<if test="softcommentid != null and softcommentid != ''">
+			and a.softcommentid = #{softcommentid}
+		</if>
+		<if test="userid != null and userid != ''">
+			and b.userid = #{userid}
+		</if>
+		<if test="content != null and content != ''">
+			and a.content = #{content}
+		</if>
+		<if test="support_num != null and support_num != ''">
+			and a.support_num = #{support_num}
+		</if>
+		<if test="createtime != null and createtime != ''">
+			and a.createtime = #{createtime}
+		</if>
+	</select>
+
+	<select id="listAll2" parameterType="Map" resultType="Map">
+		select
+		<include refid="Base_Column_List" />
+		from sd_softcomment a
+		where 1=1
+		<if test="softcommentid != null and softcommentid != ''">
+			and a.softcommentid = #{softcommentid}
+		</if>
+		<if test="content != null and content != ''">
+			and a.content = #{content}
+		</if>
+		<if test="support_num != null and support_num != ''">
+			and a.support_num = #{support_num}
+		</if>
+		<if test="createtime != null and createtime != ''">
+			and a.createtime = #{createtime}
+		</if>
+	</select>
+
+	<select id="queryCount" parameterType="Map" resultType="int">
+		select 
+    			count(a.sd_user_id) as count
+		from sd_user a
+		where 1=1
+			<if test="sd_user_id != null and sd_user_id != ''">
+				and a.sd_user_id = #{sd_user_id}
+			</if>
+			<if test="userid != null and userid != ''">
+				and a.userid = #{userid}
+			</if>
+			<if test="hyb_count != null and hyb_count != ''">
+				and a.hyb_count = #{hyb_count}
+			</if>
+			<if test="hyb_succ_count != null and hyb_succ_count != ''">
+				and a.hyb_succ_count = #{hyb_succ_count}
+			</if>
+			<if test="typezh != null and typezh != ''">
+				and a.typezh = #{typezh}
+			</if>
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+       		 delete from sd_user
+		where 
+    	sd_user_id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+
+	<!--按时间查找用户评价 -->
+	<select id="queryUser" parameterType="Map" resultType="Map">
+		select
+		sd_softcomment.*
+		from
+		sd_softcomment
+		where
+		sd_softcomment.userid = #{userid}
+		AND
+		sd_softcomment.createtime =#{createtime}
+	</select>
+	<!--按点赞数查找用户评价 -->
+	<select id="queryUserByNum" parameterType="Map" resultType="Map">
+		select
+		sd_softcomment.*
+		from
+		sd_softcomment
+		order by
+        sd_softcomment.support_num
+         DESC
+	</select>
+	<!--用户点赞记录-->
+	<select id="queryDZJL" parameterType="Map" resultType="Map">
+		select
+		a.*
+		from
+		sd_softcomment_user a
+		WHERE
+		a.userid = #{userid}
+		AND
+		a.softcommentid = #{softcommentid}
+		AND
+		 a.createtime=#{createtime}
+	</select>
+
+	<!--指定评论点赞数 -->
+	<select id="queryDZS" parameterType="Map" resultType="Map">
+		select
+		sd_softcomment.support_num
+		from
+		sd_softcomment
+		WHERE
+		sd_softcomment.softcommentid = #{softcommentid}
+	</select>
+
+	<!--修改指定评论点赞数-->
+	<update id="editNum" parameterType="Map">
+		update  sd_softcomment
+		<trim suffixOverrides=",">
+			<set >
+				<if test="support_num != null and support_num != ''" >
+					support_num = #{support_num,jdbcType=VARCHAR},
+				</if>
+			</set>
+		</trim>
+		where
+		softcommentid = #{softcommentid}
+	</update>
+	<!--删除同天点赞记录-->
+	<delete id="deleteDZJL" parameterType="Map">
+		delete from sd_softcomment_user
+		where
+		sd_softcomment_user.id = #{id}
+	</delete>
+
+	<!--用户点赞记录-->
+	<select id="queryDZJLno" parameterType="Map" resultType="Map">
+		select
+		a.*
+		from
+		sd_softcomment_user a
+		WHERE
+		a.userid = #{userid}
+		AND
+		a.createtime=#{createtime}
+		<if test="softcommentid != null and softcommentid != ''" >
+			AND a.softcommentid = #{softcommentid,jdbcType=VARCHAR}
+		</if>
+
+	</select>
+
+
+	
+</mapper>

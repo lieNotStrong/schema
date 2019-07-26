@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ScheduMapper">
+    <sql id="Base_Column_List">
+			a.*
+  	</sql>
+
+
+    <insert id="saveList" parameterType="java.util.List">
+        insert into sd_workforce_company(
+        workforce_company_id,
+        workforce_date,
+        starttime,
+        endtime,
+        positionid,
+        num,
+        sametable,
+        createtime,
+        finall,
+        userid
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.workforce_company_id,jdbcType=VARCHAR},
+            #{item.workforce_date,jdbcType=VARCHAR},
+            #{item.starttime,jdbcType=VARCHAR},
+            #{item.endtime,jdbcType=VARCHAR},
+            #{item.positionid,jdbcType=VARCHAR},
+            #{item.num,jdbcType=VARCHAR},
+            #{item.sametable,jdbcType=VARCHAR},
+            #{item.createtime,jdbcType=VARCHAR},
+            #{item.finall,jdbcType=VARCHAR},
+            #{item.userid,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+
+    <!-- 保存排班-->
+    <insert id="save" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+		insert into sd_workforce_company(
+			workforce_company_id,
+			workforce_date,
+			starttime,
+			endtime,
+			positionid,
+			num,
+			sametable,
+			createtime,
+
+			userid,
+			flag
+		) values (
+			#{workforce_company_id,jdbcType=VARCHAR},
+			#{workforce_date,jdbcType=VARCHAR},
+			#{starttime,jdbcType=VARCHAR},
+			#{endtime,jdbcType=VARCHAR},
+			#{positionid,jdbcType=VARCHAR},
+			#{num,jdbcType=VARCHAR},
+			#{sametable,jdbcType=VARCHAR},
+			#{createtime},
+
+			#{userid,jdbcType=VARCHAR},
+			#{flag,jdbcType=VARCHAR}
+			)
+	</insert>
+    <!-- 删除-->
+    <delete id="delete" parameterType="Map">
+       		 delete from sd_user
+		where 
+    	sd_user_id = #{sd_user_id}
+	</delete>
+    <!-- 修改 -->
+    <update id="edit" parameterType="Map">
+        update sd_workforce_company
+        <trim suffixOverrides=",">
+            <set>
+                <if test="workforce_company_id != null and workforce_company_id != ''">
+                    workforce_company_id = #{workforce_company_id,jdbcType=VARCHAR},
+                </if>
+                <if test="workforce_date != null and workforce_date != ''">
+                    workforce_date = #{workforce_date,jdbcType=VARCHAR},
+                </if>
+                <if test="starttime != null and starttime != ''">
+                    starttime = #{starttime,jdbcType=VARCHAR},
+                </if>
+                <if test="endtime != null and endtime != ''">
+                    endtime = #{endtime,jdbcType=VARCHAR},
+                </if>
+                <if test="positionid != null and positionid != ''">
+                    positionid = #{positionid,jdbcType=VARCHAR},
+                </if>
+                <if test="num != null and num != ''">
+                    num = #{num,jdbcType=VARCHAR},
+                </if>
+                <if test="createtime != null and createtime != ''">
+                    createtime = #{createtime,jdbcType=VARCHAR},
+                </if>
+                <if test="userid != null and userid != ''">
+                    userid = #{userid,jdbcType=VARCHAR},
+                </if>
+                <if test="final != null and final != ''">
+                    final = #{final,jdbcType=VARCHAR}，
+                </if>
+                <if test="flag != null and flag != ''">
+                    flag = #{flag,jdbcType=VARCHAR}
+                </if>
+            </set>
+        </trim>
+        where
+        sametable = #{sametable}
+    </update>
+    <!-- 通过ID获取数据 -->
+    <select id="findById" parameterType="Map" resultType="Map">
+        select
+        <include refid="Base_Column_List"/>
+        from
+        sd_user a
+        where 1=1
+        <if test="user_id != null and user_id != ''">
+            and a.user_id = #{user_id}
+        </if>
+        <if test="phone != null and phone != ''">
+            and a.phone = #{phone}
+        </if>
+        <if test="openid != null and openid != ''">
+            and a.openid = #{openid}
+        </if>
+    </select>
+    <!-- 列表(全部) -->
+    <select id="listAll" parameterType="Map" resultType="Map">
+        select
+        <include refid="Base_Column_List"/>,
+        (select date_format(a.workforce_date,'%W')) week,
+        b.position_name
+        from sd_workforce_company a
+        INNER JOIN
+        sd_positisdon b
+        ON a.positionid = b.positionid
+        where 1=1
+        <if test="workforce_company_id != null and workforce_company_id != ''">
+            and a.workforce_company_id = #{workforce_company_id}
+        </if>
+        <if test="workforce_date != null and workforce_date != ''">
+            and a.workforce_date = #{workforce_date}
+        </if>
+        <if test="jstime != null and jstime != ''">
+            and a.workforce_date &lt;= #{jstime}
+        </if>
+        <if test="kstime != null and kstime != ''">
+            and a.workforce_date &gt;= #{kstime}
+        </if>
+
+        <if test="starttime != null and starttime != ''">
+            and a.starttime = #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+            and a.endtime = #{endtime}
+        </if>
+        <if test="positionid != null and positionid != ''">
+            and a.positionid = #{positionid}
+        </if>
+        <if test="num != null and num != ''">
+            and a.num = #{num}
+        </if>
+        <if test="userid != null and userid != ''">
+            and a.userid = #{userid}
+        </if>
+        <if test="sametable != null and sametable != ''">
+            and a.sametable = #{sametable}
+        </if>
+        <if test="flag!= null and flag != ''">
+            and a.flag = #{flag}
+        </if>
+    </select>
+    <select id="queryCount" parameterType="Map" resultType="int">
+        select
+        count(a.sd_user_id) as count
+        from sd_user a
+        where 1=1
+        <if test="sd_user_id != null and sd_user_id != ''">
+            and a.sd_user_id = #{sd_user_id}
+        </if>
+        <if test="userid != null and userid != ''">
+            and a.userid = #{userid}
+        </if>
+        <if test="hyb_count != null and hyb_count != ''">
+            and a.hyb_count = #{hyb_count}
+        </if>
+        <if test="hyb_succ_count != null and hyb_succ_count != ''">
+            and a.hyb_succ_count = #{hyb_succ_count}
+        </if>
+        <if test="typezh != null and typezh != ''">
+            and a.typezh = #{typezh}
+        </if>
+    </select>
+    <!-- 批量删除 -->
+    <delete id="deleteAll" parameterType="String">
+        delete from sd_user
+        where
+        sd_user_id in
+        <foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- 根据日期查询公司员工排班信息 -->
+    <select id="findWorkforceByDate" parameterType="Map" resultType="Map">
+        SELECT
+        sde.workforce_employee_id,
+        sde.starttime,
+        sde.endtime,
+        su.nikename,
+        sde.workforce_date,
+        sde.userid,
+
+        su.user_id,
+        sde.workforce_company_id,
+        sde.sametable,
+        (select date_format(sde.workforce_date,'%W')) week
+        FROM
+         sd_workforce_employee_zhou sde
+        INNER JOIN sd_user su ON sde.userid = su.user_id
+
+        where 1=1
+        <if test="workforce_date != null and workforce_date != ''">
+            and sde.workforce_date = #{workforce_date}
+        </if>
+        <if test="user_id != null and user_id != ''">
+            and sde.companyuserid = #{user_id}
+        </if>
+        <if test="confirm_boolean != null and confirm_boolean != ''">
+            and sde.confirm_boolean = #{confirm_boolean}
+        </if>
+
+
+
+    </select>
+    <select id="findWorkforceByTime" parameterType="Map" resultType="Map">
+        SELECT
+        sde.workforce_employee_id,
+        sde.starttime,
+        sde.endtime,
+        sde.sametable,
+        su.nikename,
+        sde.workforce_date,
+        su.user_id,
+        sde.userid,
+        (select date_format(sde.workforce_date,'%W')) week
+        FROM
+        sd_workforce_employee sde
+        LEFT JOIN sd_user su ON sde.userid=su.user_id
+        WHERE
+        sde.userid IN ( SELECT userid FROM sd_comuser WHERE companyuserid = #{user_id} )
+        <if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+            and sde.workforce_date
+            between #{startdate} and #{enddate}
+        </if>
+    </select>
+    <!-- 修改员工排班信息-->
+    <update id="updateWorkforce" parameterType="Map">
+        update sd_workforce_company
+        <trim suffixOverrides=",">
+            <set>
+                <if test="starttime != null and starttime != ''">
+                    starttime = #{starttime,jdbcType=VARCHAR},
+                </if>
+                <if test="endtime != null and endtime != ''">
+                    endtime = #{endtime,jdbcType=VARCHAR},
+                </if>
+                <if test="createtime != null and createtime != ''">
+                    createtime = #{createtime,jdbcType=VARCHAR},
+                </if>
+                <if test="flag != null and flag != ''">
+                    flag = #{flag,jdbcType=VARCHAR},
+                </if>
+            </set>
+        </trim>
+        where
+        workforce_employee_id=#{workforce_employee_id}
+    </update>
+    <select id="findUserByComuserid" parameterType="Map" resultType="Map">
+
+		SELECT (SELECT GROUP_CONCAT(CONCAT(CONCAT(f.user_id,'#'),f.nikename))  FROM sd_comuser e
+			left join sd_user f on e.userid = f.user_id
+			WHERE e.companyuserid = a.userid ) AS allusers,
+			(SELECT GROUP_CONCAT(CONCAT(CONCAT(CONCAT(f.user_id,'#'),f.nikename),'#'),bb.workforce_employee_id)  FROM sd_comuser e
+			left join sd_user f on e.userid = f.user_id
+			LEFT JOIN sd_workforce_company aa ON e.companyuserid = aa.userid
+			LEFT JOIN sd_workforce_employee_zhou bb on aa.workforce_company_id =bb.workforce_company_id
+			WHERE aa.userid=#{user_id} and aa.workforce_date=#{workforce_date} and e.userid=bb.userid	) AS yusers
+		FROM sd_workforce_company a
+
+		where a.userid=#{user_id} and a.workforce_date=#{workforce_date}
+    </select>
+
+    <select id="findUserByAvgCount" parameterType="Map" resultType="Map">
+		SELECT
+         sd_comuser.userid,
+         sd_comuser.score
+         FROM
+          sd_comuser
+         WHERE
+          sd_comuser.companyuserid = #{user_id}
+    </select>
+    <!--添加公司员工排班-->
+    <insert id="saveWorkforce" parameterType="Map">
+		insert into sd_workforce_employee(
+			workforce_employee_id,
+			sametable,
+			workforce_company_id,
+			userid,
+			starttime,
+			endtime,
+			createtime,
+			confirm_boolean
+		) values (
+			#{workforce_employee_id,jdbcType=VARCHAR},
+			#{sametable,jdbcType=VARCHAR},
+			#{workforce_company_id,jdbcType=VARCHAR},
+			#{userid,jdbcType=VARCHAR},
+			#{starttime,jdbcType=VARCHAR},
+			#{endtime,jdbcType=VARCHAR},
+			#{createtime},
+			#{confirm_boolean,jdbcType=VARCHAR}
+			)
+	</insert>
+
+
+    <select id="findStatus" parameterType="Map" resultType="Map">
+
+	SELECT
+	*
+FROM
+	sd_workforce_company
+WHERE
+	starttime = #{starttime}
+	AND endtime = #{endtime}
+	AND workforce_date = #{workforce_date}
+	AND positionid IN ( ( SELECT com.positionid FROM sd_comuser com WHERE userid = #{user_id} AND companyuserid =#{userid} ) )
+
+	</select>
+
+    <update id="editNum" parameterType="Map">
+        update sd_workforce_company
+        <trim suffixOverrides=",">
+            <set>
+                <if test="num != null and num != ''">
+                    num = #{num,jdbcType=VARCHAR}
+                </if>
+            </set>
+        </trim>
+        where
+        workforce_company_id=#{workforce_company_id}
+    </update>
+
+    <!--根据企业排班表ID查询选择此排班的数量-->
+    <select id="findCount" parameterType="Map" resultType="Map">
+
+	select * FROM sd_workforce_employee where workforce_company_id=#{workforce_company_id}
+
+	</select>
+
+
+    <!-- 通过ID修改公司排班表状态 -->
+    <update id="editCompany" parameterType="Map">
+        update sd_workforce_company
+        <trim suffixOverrides=",">
+            <set>
+                <if test="workforce_company_id != null and workforce_company_id != ''">
+                    workforce_company_id = #{workforce_company_id,jdbcType=VARCHAR},
+                </if>
+                <if test="workforce_date != null and workforce_date != ''">
+                    workforce_date = #{workforce_date,jdbcType=VARCHAR},
+                </if>
+                <if test="starttime != null and starttime != ''">
+                    starttime = #{starttime,jdbcType=VARCHAR},
+                </if>
+                <if test="endtime != null and endtime != ''">
+                    endtime = #{endtime,jdbcType=VARCHAR},
+                </if>
+                <if test="positionid != null and positionid != ''">
+                    positionid = #{positionid,jdbcType=VARCHAR},
+                </if>
+                <if test="num != null and num != ''">
+                    num = #{num,jdbcType=VARCHAR},
+                </if>
+                <if test="createtime != null and createtime != ''">
+                    createtime = #{createtime,jdbcType=VARCHAR},
+                </if>
+                <if test="userid != null and userid != ''">
+                    userid = #{userid,jdbcType=VARCHAR},
+                </if>
+                <if test="final != null and final != ''">
+                    final = #{final,jdbcType=VARCHAR}
+                </if>
+                <if test="flag != null and flag != ''">
+                    flag = #{flag,jdbcType=VARCHAR}
+                </if>
+            </set>
+        </trim>
+        where
+        workforce_company_id = #{workforce_company_id}
+    </update>
+
+    <!--根据企业排班表ID查询选择此排班的数量-->
+    <select id="findSametable" parameterType="Map" resultType="Map">
+
+		select sdc.sametable from  sd_workforce_company sdc
+		where userid=#{userid}
+		ORDER BY sdc.sametable DESC
+	</select>
+
+    <select id="findWorkforceByTimeSystem" parameterType="Map" resultType="Map">
+        SELECT
+        sde.*,
+        su.nikename,
+        su.user_id,
+        (select date_format(sde.workforce_date,'%W')) week
+        FROM
+        sd_workforce_employee_system sde
+        LEFT JOIN sd_user su ON sde.userid=su.user_id
+        WHERE
+        sde.confirm_boolean = '1'
+        AND
+        sde.userid IN ( SELECT userid FROM sd_comuser WHERE companyuserid = #{user_id} )
+        <if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+            and sde.workforce_date
+            between #{startdate} and #{enddate}
+        </if>
+    </select>
+    <!-- 批量删除 -->
+    <delete id="deleteCompanyJL" parameterType="Map">
+        delete from sd_workforce_company
+        where
+        1=1
+        <if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+            and sd_workforce_company.workforce_date
+            between #{startdate} and #{enddate}
+        </if>
+        AND
+        sd_workforce_company.userid = #{userid}
+        AND
+        sd_workforce_company.flag = #{flag}
+    </delete>
+
+    <!-- 保存排班-->
+    <insert id="saveAgain" useGeneratedKeys="true" keyProperty="user_id" parameterType="Map">
+        insert into sd_workforce_company_copy(
+        workforce_company_id,
+        workforce_date,
+        starttime,
+        endtime,
+        positionid,
+        num,
+        sametable,
+        createtime,
+        userid,
+        flag
+        ) values (
+        #{workforce_company_id,jdbcType=VARCHAR},
+        #{workforce_date,jdbcType=VARCHAR},
+        #{starttime,jdbcType=VARCHAR},
+        #{endtime,jdbcType=VARCHAR},
+        #{positionid,jdbcType=VARCHAR},
+        #{num,jdbcType=VARCHAR},
+        #{sametable,jdbcType=VARCHAR},
+        #{createtime},
+
+        #{userid,jdbcType=VARCHAR},
+        #{flag,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- 批量删除 -->
+    <delete id="deleteCompanyCopyJL" parameterType="Map">
+        delete from sd_workforce_company_copy
+        where
+        1=1
+        <if test="startdate != null and startdate != '' and enddate != null and enddate != ''">
+            and sd_workforce_company_copy.workforce_date
+            between #{startdate} and #{enddate}
+        </if>
+        AND
+        sd_workforce_company_copy.userid = #{userid}
+        AND
+        sd_workforce_company_copy.flag = #{flag}
+    </delete>
+
+    <!-- 列表(全部) -->
+    <select id="listAllAgain" parameterType="Map" resultType="Map">
+        select
+        <include refid="Base_Column_List"/>,
+        (select date_format(a.workforce_date,'%W')) week
+        from sd_workforce_company_copy a
+        INNER JOIN
+        sd_positisdon b
+        ON a.positionid = b.positionid
+        where 1=1
+        <if test="workforce_company_id != null and workforce_company_id != ''">
+            and a.workforce_company_id = #{workforce_company_id}
+        </if>
+        <if test="workforce_date != null and workforce_date != ''">
+            and a.workforce_date = #{workforce_date}
+        </if>
+        <if test="jstime != null and jstime != ''">
+            and a.workforce_date &lt;= #{jstime}
+        </if>
+        <if test="kstime != null and kstime != ''">
+            and a.workforce_date &gt;= #{kstime}
+        </if>
+
+        <if test="starttime != null and starttime != ''">
+            and a.starttime = #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+            and a.endtime = #{endtime}
+        </if>
+        <if test="positionid != null and positionid != ''">
+            and a.positionid = #{positionid}
+        </if>
+        <if test="num != null and num != ''">
+            and a.num = #{num}
+        </if>
+        <if test="userid != null and userid != ''">
+            and a.userid = #{userid}
+        </if>
+        <if test="sametable != null and sametable != ''">
+            and a.sametable = #{sametable}
+        </if>
+        <if test="flag!= null and flag != ''">
+            and a.flag = #{flag}
+        </if>
+    </select>
+
+
+
+    <!-- 列表(全部) -->
+    <select id="listAllZhou" parameterType="Map" resultType="Map">
+        select
+        <include refid="Base_Column_List"/>,
+        (select date_format(a.workforce_date,'%W')) week
+        from sd_workforce_employee_zhou a
+        where 1=1
+        <if test="workforce_company_id != null and workforce_company_id != ''">
+            and a.workforce_company_id = #{workforce_company_id}
+        </if>
+        <if test="workforce_employee_id != null and workforce_employee_id != ''">
+            and a.workforce_employee_id = #{workforce_employee_id}
+        </if>
+        <if test="workforce_date != null and workforce_date != ''">
+            and a.workforce_date = #{workforce_date}
+        </if>
+        <if test="jstime != null and jstime != ''">
+            and a.workforce_date &lt;= #{jstime}
+        </if>
+        <if test="kstime != null and kstime != ''">
+            and a.workforce_date &gt;= #{kstime}
+        </if>
+        <if test="starttime != null and starttime != ''">
+            and a.starttime = #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+            and a.endtime = #{endtime}
+        </if>
+        <if test="userid != null and userid != ''">
+            and a.userid = #{userid}
+        </if>
+        <if test="sametable != null and sametable != ''">
+            and a.sametable = #{sametable}
+        </if>
+        <if test="companyuserid!= null and companyuserid != ''">
+            and a.companyuserid = #{companyuserid}
+        </if>
+        <if test="confirm_boolean!= null and confirm_boolean != ''">
+            and a.confirm_boolean = #{confirm_boolean}
+        </if>
+        <if test="createtime!= null and createtime != ''">
+            and a.createtime = #{createtime}
+        </if>
+    </select>
+
+    <select id="findSameFormZhou" parameterType="Map" resultType="Map">
+        SELECT
+        swez.*
+        FROM
+        sd_workforce_employee_zhou swez
+        WHERE
+        swez.companyuserid = #{companyuserid}
+        AND
+        swez.userid = #{userid}
+        AND
+        swez.workforce_date = #{workforce_date}
+        <if test="starttime != null and starttime != '' ">
+            and #{starttime}
+            between swez.starttime and swez.endtime
+        </if>
+        <if test=" endtime != null and endtime != ''">
+            and #{endtime}
+            between swez.starttime and swez.endtime
+        </if>
+    </select>
+
+    <select id="findSameFormZhouKS" parameterType="Map" resultType="Map">
+        SELECT
+        swez.*
+        FROM
+        sd_workforce_employee_zhou swez
+        WHERE
+        swez.companyuserid = #{companyuserid}
+        AND
+        swez.userid = #{userid}
+        AND
+        swez.workforce_date = #{workforce_date}
+        <if test="starttime != null and starttime != '' ">
+            and #{starttime}
+            between swez.starttime and swez.endtime
+        </if>
+
+    </select>
+
+    <select id="findSameFormZhouJS" parameterType="Map" resultType="Map">
+        SELECT
+        swez.*
+        FROM
+        sd_workforce_employee_zhou swez
+        WHERE
+        swez.companyuserid = #{companyuserid}
+        AND
+        swez.userid = #{userid}
+        AND
+        swez.workforce_date = #{workforce_date}
+
+        <if test=" endtime != null and endtime != ''">
+            and #{endtime}
+            between swez.starttime and swez.endtime
+        </if>
+    </select>
+
+    <!-- 通过ID修改公司排班表状态 -->
+    <update id="editEmployeeZhouSame" parameterType="Map">
+        update sd_workforce_employee_zhou
+        <trim suffixOverrides=",">
+            <set>
+
+                <if test="starttime != null and starttime != ''">
+                    starttime = #{starttime,jdbcType=VARCHAR},
+                </if>
+                <if test="endtime != null and endtime != ''">
+                    endtime = #{endtime,jdbcType=VARCHAR},
+                </if>
+
+                <if test="createtime != null and createtime != ''">
+                    createtime = #{createtime,jdbcType=VARCHAR},
+                </if>
+
+            </set>
+        </trim>
+        where
+        companyuserid = #{companyuserid}
+        AND
+        userid = #{userid}
+        AND
+        workforce_date = #{workforce_date}
+    </update>
+
+    <!-- 批量删除 -->
+    <delete id="deleteEmployeeZhouSame" parameterType="Map">
+        delete from sd_workforce_employee_zhou
+        where
+        1=1
+        <if test="starttime != null and starttime != '' and endtime != null and endtime != ''">
+            and sd_workforce_employee_zhou.starttime
+            between #{starttime} and #{endtime}
+        </if>
+        <if test="starttime != null and starttime != '' and endtime != null and endtime != ''">
+            and sd_workforce_employee_zhou.endtime
+            between #{starttime} and #{endtime}
+        </if>
+        AND
+        sd_workforce_employee_zhou.companyuserid = #{companyuserid}
+        AND
+        sd_workforce_employee_zhou.workforce_date = #{workforce_date}
+    </delete>
+
+    <select id="findSameFormZhouTwo" parameterType="Map" resultType="Map">
+        SELECT
+        swez.*
+        FROM
+        sd_workforce_employee_zhou swez
+        WHERE
+        swez.companyuserid = #{companyuserid}
+        AND
+        swez.userid = #{userid}
+        AND
+        swez.workforce_date = #{workforce_date}
+        <if test="starttime != null and starttime != ''and endtime != null and endtime != '' ">
+            and swez.starttime
+            between #{starttime} and #{endtime}
+        </if>
+        <if test="starttime != null and starttime != ''and endtime != null and endtime != ''">
+            and swez.endtime
+            between #{starttime} and #{endtime}
+        </if>
+    </select>
+
+    <!-- 列表(全部) -->
+    <select id="listAllZhouQc" parameterType="Map" resultType="Map">
+        select
+        distinct  a.userid
+        from sd_workforce_employee_zhou a
+        where 1=1
+        <if test="workforce_company_id != null and workforce_company_id != ''">
+            and a.workforce_company_id = #{workforce_company_id}
+        </if>
+        <if test="workforce_employee_id != null and workforce_employee_id != ''">
+            and a.workforce_employee_id = #{workforce_employee_id}
+        </if>
+        <if test="workforce_date != null and workforce_date != ''">
+            and a.workforce_date = #{workforce_date}
+        </if>
+        <if test="jstime != null and jstime != ''">
+            and a.workforce_date &lt;= #{jstime}
+        </if>
+        <if test="kstime != null and kstime != ''">
+            and a.workforce_date &gt;= #{kstime}
+        </if>
+        <if test="starttime != null and starttime != ''">
+            and a.starttime = #{starttime}
+        </if>
+        <if test="endtime != null and endtime != ''">
+            and a.endtime = #{endtime}
+        </if>
+        <if test="userid != null and userid != ''">
+            and a.userid = #{userid}
+        </if>
+        <if test="sametable != null and sametable != ''">
+            and a.sametable = #{sametable}
+        </if>
+        <if test="companyuserid!= null and companyuserid != ''">
+            and a.companyuserid = #{companyuserid}
+        </if>
+        <if test="confirm_boolean!= null and confirm_boolean != ''">
+            and a.confirm_boolean = #{confirm_boolean}
+        </if>
+        <if test="createtime!= null and createtime != ''">
+            and a.createtime = #{createtime}
+        </if>
+    </select>
+
+
+
+
+</mapper>
